@@ -19,7 +19,7 @@ CORS(app)
 # CONFIGURATION
 # ─────────────────────────────────────────────────────
 
-GROQ_API_KEY = "GroQ key"   # ← Replace with your key
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")  # ← Replace with your key
 MODEL        = "llama-3.3-70b-versatile"
 client       = Groq(api_key=GROQ_API_KEY)
 

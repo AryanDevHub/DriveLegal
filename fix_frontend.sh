@@ -5,7 +5,7 @@ echo "Fixing API_BASE in all frontend pages..."
 
 # 1. Update API_BASE from localhost to relative path (works with Flask serving frontend)
 find frontend/pages -name "*.html" -exec sed -i \
-  "s|const API_BASE = 'http://localhost:5000';|const API_BASE = 'http://localhost:5000';|g" {} \;
+  "s|  const API_BASE = '';|  const API_BASE = '';|g" {} \;
 
 # 2. Update all old API endpoint paths to /api/ prefix
 find frontend/pages -name "*.html" -exec sed -i \
