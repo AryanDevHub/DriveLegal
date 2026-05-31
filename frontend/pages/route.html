@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Route Legal Briefing — DriveLegal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --green:      #1a6b3c;
+      --green-mid:  #2d8a55;
+      --green-lite: #52c47e;
+      --green-glow: #7ffab5;
+      --dark:       #0a0f0d;
+      --dark2:      #0e1510;
+      --dark3:      #182019;
+      --card-bg:    #111a14;
+      --border:     rgba(82,196,126,0.18);
+      --text:       #e8f5ec;
+      --muted:      #7a9b82;
+      --red:        #e74c3c;
+      --orange:     #e67e22;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark); color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 10% 20%, rgba(26,107,60,0.2) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 85% 75%, rgba(45,138,85,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    * { position: relative; z-index: 1; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,13,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 500;
+    }
+
+    .back-btn {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.88rem; font-weight: 500;
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--green-lite); }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+    }
+
+    .state-pill {
+      margin-left: auto;
+      background: rgba(82,196,126,0.1);
+      border: 1px solid var(--border);
+      padding: 5px 14px; border-radius: 99px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; color: var(--green-lite);
+    }
+
+    .state-pill select {
+      background: transparent; border: none;
+      color: var(--green-lite);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; outline: none; cursor: pointer;
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      max-width: 1100px; margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .panel-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 800;
+      color: white; margin-bottom: 6px;
+    }
+
+    .panel-card .sub {
+      color: var(--muted); font-size: 0.88rem;
+      margin-bottom: 20px; line-height: 1.5;
+    }
+
+    .field-label {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+
+    .input-field, .select-field {
+      width: 100%; padding: 11px 14px;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+    }
+    .input-field:focus, .select-field:focus { border-color: var(--green-lite); }
+    .input-field::placeholder { color: var(--muted); }
+
+    /* Route arrow between inputs */
+    .route-arrow {
+      text-align: center; font-size: 1.2rem;
+      color: var(--green-lite); margin: -6px 0 8px;
+    }
+
+    /* Swap button */
+    .swap-btn {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: rgba(82,196,126,0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 8px;
+      color: var(--green-lite); cursor: pointer;
+      font-size: 0.8rem; transition: background 0.2s;
+    }
+    .swap-btn:hover { background: rgba(82,196,126,0.2); }
+
+    .input-wrap { position: relative; }
+    .input-wrap .input-field { padding-right: 50px; }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--green-mid));
+      color: white; padding: 14px;
+      border: none; border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(26,107,60,0.4);
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,107,60,0.5); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Quick routes */
+    .quick-label {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+
+    .quick-routes {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .quick-chip {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    }
+    .quick-chip:hover {
+      border-color: var(--green-lite);
+      background: rgba(82,196,126,0.06);
+    }
+    .quick-chip .route-name {
+      font-size: 0.88rem; font-weight: 500; color: var(--text);
+    }
+    .quick-chip .route-dist {
+      font-size: 0.78rem; color: var(--muted);
+    }
+
+    /* Checklist card */
+    .checklist { display: flex; flex-direction: column; gap: 8px; }
+
+    .check-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: var(--muted);
+    }
+    .check-item .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green-lite); flex-shrink: 0;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    /* MAP */
+    .map-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+
+    #map {
+      height: 320px;
+      background: var(--dark3);
+    }
+
+    /* Fix leaflet z-index inside dark layout */
+    .leaflet-pane,
+    .leaflet-top,
+    .leaflet-bottom { z-index: 10 !important; }
+
+    .map-footer {
+      padding: 12px 18px;
+      display: flex; gap: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .map-stat { font-size: 0.82rem; color: var(--muted); }
+    .map-stat span { color: var(--green-lite); font-weight: 600; }
+
+    /* EMPTY STATE */
+    .map-empty {
+      height: 320px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .map-empty .big-icon { font-size: 3rem; }
+
+    /* LOADING */
+    .loading-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px 24px;
+      text-align: center; display: none;
+    }
+    .loading-ring {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--green-lite);
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    /* RESULTS */
+    #resultsArea { display: flex; flex-direction: column; gap: 16px; }
+
+    /* Warning banner */
+    .warn-banner {
+      background: rgba(220,60,60,0.1);
+      border: 1px solid rgba(220,60,60,0.3);
+      border-radius: 14px; padding: 18px 20px;
+      animation: fadeUp 0.4s ease;
+    }
+    .warn-banner h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      color: #ff8888; margin-bottom: 8px;
+    }
+    .warn-banner ul { padding-left: 18px; }
+    .warn-banner li { color: #ffaaaa; font-size: 0.88rem; margin-bottom: 4px; }
+
+    /* Route overview */
+    .route-overview {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px;
+      display: flex; gap: 24px; flex-wrap: wrap;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .ov-stat { display: flex; flex-direction: column; gap: 2px; }
+    .ov-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .ov-value { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: white; }
+
+    /* State card */
+    .state-briefing {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .state-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(26,107,60,0.15);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .state-header h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; color: white;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .state-badge {
+      background: rgba(82,196,126,0.15);
+      color: var(--green-lite);
+      font-size: 0.72rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 99px;
+    }
+
+    .toggle-icon { color: var(--green-lite); font-size: 0.9rem; transition: transform 0.2s; }
+    .state-briefing.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .state-briefing.collapsed .state-body { display: none; }
+
+    .state-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+    .info-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+    }
+
+    .info-box {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .info-box .ib-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .info-box .ib-value { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: white; }
+
+    .rules-grid { display: flex; flex-direction: column; gap: 6px; }
+    .rule-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.87rem; color: var(--text); line-height: 1.4;
+    }
+    .rule-item::before { content: '→'; color: var(--green-lite); flex-shrink: 0; }
+
+    .fines-table { width: 100%; border-collapse: collapse; }
+    .fines-table th {
+      font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      text-align: left; padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .fines-table td {
+      padding: 8px 10px; font-size: 0.88rem; color: var(--text);
+      border-bottom: 1px solid rgba(82,196,126,0.07);
+    }
+    .fines-table .fine-amt {
+      color: var(--green-lite); font-weight: 600;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .docs-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .doc-tag {
+      background: rgba(82,196,126,0.1);
+      border: 1px solid var(--border);
+      color: var(--green-lite);
+      font-size: 0.78rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 99px;
+    }
+
+    /* section label inside state body */
+    .sec-label {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+
+    /* Tips footer */
+    .tips-strip {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 12px;
+    }
+
+    .tip-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+    }
+    .tip-box .tip-icon { font-size: 1.2rem; margin-bottom: 6px; display: block; }
+    .tip-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 860px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      .info-row { grid-template-columns: 1fr 1fr; }
+      .tips-strip { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .info-row { grid-template-columns: 1fr; }
+      .route-overview { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="/" class="back-btn">← Back</a>
+  <div class="topbar-title">🗺️ Route Legal Briefing</div>
+  <div class="state-pill">
+    📍
+    <select id="stateSelector" onchange="saveState()">
+      <option value="MP">Madhya Pradesh</option>
+      <option value="MH">Maharashtra</option>
+      <option value="DL">Delhi</option>
+      <option value="KA">Karnataka</option>
+      <option value="TN">Tamil Nadu</option>
+      <option value="UP">Uttar Pradesh</option>
+      <option value="GJ">Gujarat</option>
+      <option value="RJ">Rajasthan</option>
+    </select>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+
+    <!-- Input card -->
+    <div class="panel-card">
+      <h2>🗺️ Plan Your Route</h2>
+      <p class="sub">Get a state-by-state legal briefing before your interstate journey.</p>
+
+      <div class="field-label">From</div>
+      <div class="input-wrap">
+        <input type="text" class="input-field" id="origin"
+               placeholder="e.g. Indore"/>
+      </div>
+
+      <div class="route-arrow">↓</div>
+
+      <div class="field-label">To</div>
+      <div class="input-wrap">
+        <input type="text" class="input-field" id="destination"
+               placeholder="e.g. Mumbai"/>
+        <button class="swap-btn" onclick="swapCities()" title="Swap cities">⇅</button>
+      </div>
+
+      <div class="field-label">Vehicle Type</div>
+      <select class="select-field" id="vehicle">
+        <option value="2wheeler">🏍️ 2-Wheeler (Bike/Scooter)</option>
+        <option value="car" selected>🚗 Car / SUV</option>
+        <option value="truck">🚛 Truck / HMV</option>
+        <option value="bus">🚌 Bus</option>
+      </select>
+
+      <button class="btn-primary" id="briefingBtn" onclick="getBriefing()">
+        🗺️ Get Legal Briefing
+      </button>
+    </div>
+
+    <!-- Quick routes -->
+    <div class="panel-card">
+      <div class="quick-label">⚡ Quick Routes</div>
+      <div class="quick-routes">
+        <div class="quick-chip" onclick="setRoute('Indore','Mumbai')">
+          <span class="route-name">Indore → Mumbai</span>
+          <span class="route-dist">~600 km</span>
+        </div>
+        <div class="quick-chip" onclick="setRoute('Delhi','Jaipur')">
+          <span class="route-name">Delhi → Jaipur</span>
+          <span class="route-dist">~280 km</span>
+        </div>
+        <div class="quick-chip" onclick="setRoute('Bangalore','Chennai')">
+          <span class="route-name">Bangalore → Chennai</span>
+          <span class="route-dist">~350 km</span>
+        </div>
+        <div class="quick-chip" onclick="setRoute('Mumbai','Pune')">
+          <span class="route-name">Mumbai → Pune</span>
+          <span class="route-dist">~150 km</span>
+        </div>
+        <div class="quick-chip" onclick="setRoute('Delhi','Lucknow')">
+          <span class="route-name">Delhi → Lucknow</span>
+          <span class="route-dist">~500 km</span>
+        </div>
+        <div class="quick-chip" onclick="setRoute('Indore','Delhi')">
+          <span class="route-name">Indore → Delhi</span>
+          <span class="route-dist">~790 km</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Always-carry checklist -->
+    <div class="panel-card">
+      <div class="quick-label">📄 Always Carry These</div>
+      <div class="checklist">
+        <div class="check-item"><div class="dot"></div>Driving Licence (DL)</div>
+        <div class="check-item"><div class="dot"></div>Registration Certificate (RC)</div>
+        <div class="check-item"><div class="dot"></div>Insurance Policy / Certificate</div>
+        <div class="check-item"><div class="dot"></div>PUC Certificate</div>
+        <div class="check-item"><div class="dot"></div>Aadhaar / Photo ID</div>
+        <div class="check-item"><div class="dot"></div>Permit (for commercial vehicles)</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+
+    <!-- Map -->
+    <div class="map-card">
+      <div id="mapArea">
+        <div class="map-empty" id="mapEmpty">
+          <div class="big-icon">🗺️</div>
+          <p>Enter your route to see it on the map</p>
+        </div>
+        <div id="map" style="display:none;"></div>
+      </div>
+      <div class="map-footer" id="mapFooter" style="display:none;">
+        <div class="map-stat">Distance: <span id="routeDist">—</span></div>
+        <div class="map-stat">Est. Time: <span id="routeTime">—</span></div>
+        <div class="map-stat">States: <span id="routeStates">—</span></div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-card" id="loadingCard">
+      <div class="loading-ring"></div>
+      <p id="loadingText">Fetching route and laws…<br/>Analysing state-wise legal requirements</p>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsArea"></div>
+
+    <!-- Tips (always visible) -->
+    <div class="tips-strip">
+      <div class="tip-box">
+        <span class="tip-icon">🚦</span>
+        <p>Speed limits change at state borders. Always look for new signs when crossing.</p>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">📋</span>
+        <p>Keep digital copies of all documents in DigiLocker — legally accepted nationwide.</p>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">🌙</span>
+        <p>Trucks face night driving bans on many NHs. Plan your schedule accordingly.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:5000';
+  let map = null;
+  let mapInitialized = false;
+
+  // Load saved state
+  const saved = localStorage.getItem('dl_state');
+  if (saved) document.getElementById('stateSelector').value = saved;
+
+  function saveState() {
+    localStorage.setItem('dl_state', document.getElementById('stateSelector').value);
+  }
+
+  function swapCities() {
+    const o = document.getElementById('origin');
+    const d = document.getElementById('destination');
+    [o.value, d.value] = [d.value, o.value];
+  }
+
+  function setRoute(from, to) {
+    document.getElementById('origin').value = from;
+    document.getElementById('destination').value = to;
+    getBriefing();
+  }
+
+  // ── INIT MAP ──
+  function initMap() {
+    if (mapInitialized) return;
+    document.getElementById('map').style.display = 'block';
+    document.getElementById('mapEmpty').style.display = 'none';
+    map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    mapInitialized = true;
+  }
+
+  // ── DRAW ROUTE ON MAP ──
+  async function drawRoute(origin, destination) {
+    initMap();
+
+    const getCoords = async (city) => {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)},India&format=json&limit=1`
+      );
+      const data = await res.json();
+      if (!data.length) throw new Error(`City not found: ${city}`);
+      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    };
+
+    const [start, end] = await Promise.all([
+      getCoords(origin), getCoords(destination)
+    ]);
+
+    // Remove old layers except tile layer
+    map.eachLayer(layer => {
+      if (!(layer instanceof L.TileLayer)) map.removeLayer(layer);
+    });
+
+    try {
+      const routeRes = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/` +
+        `${start[1]},${start[0]};${end[1]},${end[0]}` +
+        `?overview=full&geometries=geojson`
+      );
+      const routeData = await routeRes.json();
+      const coords = routeData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      const distKm  = Math.round(routeData.routes[0].distance / 1000);
+      const durMin  = Math.round(routeData.routes[0].duration / 60);
+      const hours   = Math.floor(durMin / 60);
+      const mins    = durMin % 60;
+
+      // Glowing route line
+      L.polyline(coords, { color: '#52c47e', weight: 5, opacity: 0.9 }).addTo(map);
+      L.polyline(coords, { color: '#7ffab5', weight: 2, opacity: 0.4, dashArray: '8,8' }).addTo(map);
+
+      // Custom markers
+      const startIcon = L.divIcon({
+        html: `<div style="background:#1a6b3c;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:2px solid #52c47e;box-shadow:0 2px 8px rgba(26,107,60,0.5);">🚦</div>`,
+        className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+      });
+      const endIcon = L.divIcon({
+        html: `<div style="background:#c0392b;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:2px solid #ff6b6b;box-shadow:0 2px 8px rgba(192,57,43,0.5);">🏁</div>`,
+        className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+      });
+
+      L.marker(start, { icon: startIcon }).addTo(map)
+        .bindPopup(`<b>Start:</b> ${origin}`, { className: 'dark-popup' });
+      L.marker(end, { icon: endIcon }).addTo(map)
+        .bindPopup(`<b>End:</b> ${destination}`, { className: 'dark-popup' });
+
+      map.fitBounds(L.polyline(coords).getBounds(), { padding: [24, 24] });
+
+      // Update footer stats
+      document.getElementById('routeDist').textContent  = `${distKm} km`;
+      document.getElementById('routeTime').textContent  = `${hours}h ${mins}m`;
+      document.getElementById('mapFooter').style.display = 'flex';
+
+      return { distKm, durHours: hours, durMins: mins };
+    } catch {
+      // If OSRM fails, just show markers
+      L.marker(start).addTo(map).bindPopup(`Start: ${origin}`).openPopup();
+      L.marker(end).addTo(map).bindPopup(`End: ${destination}`);
+      map.fitBounds([start, end], { padding: [40, 40] });
+      return { distKm: 0, durHours: 0, durMins: 0 };
+    }
+  }
+
+  // ── MAIN FUNCTION ──
+  async function getBriefing() {
+    const origin      = document.getElementById('origin').value.trim();
+    const destination = document.getElementById('destination').value.trim();
+    const vehicle     = document.getElementById('vehicle').value;
+
+    if (!origin || !destination) {
+      alert('Please enter both origin and destination cities.');
+      return;
+    }
+
+    // Show loading
+    document.getElementById('loadingCard').style.display = 'block';
+    document.getElementById('resultsArea').innerHTML = '';
+    document.getElementById('briefingBtn').disabled = true;
+    document.getElementById('loadingText').innerHTML =
+      'Drawing route on map…<br/>Then fetching state-wise laws';
+
+    try {
+      // Draw map first (visual feedback)
+      const routeInfo = await drawRoute(origin, destination);
+
+      document.getElementById('loadingText').innerHTML =
+        'Analysing traffic laws for each state…<br/>This takes 3-5 seconds';
+
+      // Fetch briefing from backend
+      const res = await fetch(`${API_BASE}/route-briefing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ origin, destination, vehicle })
+      });
+
+      if (!res.ok) throw new Error('Backend error');
+      const data = await res.json();
+
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('briefingBtn').disabled = false;
+
+      // Update states count
+      document.getElementById('routeStates').textContent =
+        data.route_states?.length || '—';
+
+      renderResults(data, origin, destination, routeInfo);
+
+    } catch (err) {
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('briefingBtn').disabled = false;
+      renderError(origin, destination);
+    }
+  }
+
+  // ── RENDER RESULTS ──
+  function renderResults(data, origin, destination, routeInfo) {
+    const area = document.getElementById('resultsArea');
+    let html = '';
+
+    // Route overview bar
+    html += `
+    <div class="route-overview">
+      <div class="ov-stat">
+        <div class="ov-label">Route</div>
+        <div class="ov-value">${origin} → ${destination}</div>
+      </div>
+      <div class="ov-stat">
+        <div class="ov-label">Distance</div>
+        <div class="ov-value">${data.total_distance_approx || (routeInfo.distKm ? routeInfo.distKm + ' km' : '—')}</div>
+      </div>
+      <div class="ov-stat">
+        <div class="ov-label">Est. Time</div>
+        <div class="ov-value">${data.estimated_time || (routeInfo.durHours ? routeInfo.durHours + 'h ' + routeInfo.durMins + 'm' : '—')}</div>
+      </div>
+      <div class="ov-stat">
+        <div class="ov-label">States</div>
+        <div class="ov-value">${data.route_states?.join(' → ') || '—'}</div>
+      </div>
+    </div>`;
+
+    // Critical warnings
+    if (data.critical_warnings?.length) {
+      html += `
+      <div class="warn-banner">
+        <h4>⚠️ Critical Warnings</h4>
+        <ul>${data.critical_warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+      </div>`;
+    }
+
+    // State by state cards
+    data.states_detail?.forEach((state, i) => {
+      const speedVal = document.getElementById('vehicle').value === '2wheeler'
+        ? state.speed_limit_2wheeler
+        : document.getElementById('vehicle').value === 'truck'
+        ? state.speed_limit_truck
+        : state.speed_limit_car;
+
+      html += `
+      <div class="state-briefing" style="animation-delay:${i * 0.08}s">
+        <div class="state-header" onclick="toggleState(this)">
+          <h3>
+            📍 ${state.state_full_name || state.state}
+            <span class="state-badge">${state.state}</span>
+          </h3>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="state-body">
+
+          <div class="info-row">
+            <div class="info-box">
+              <div class="ib-label">Speed Limit</div>
+              <div class="ib-value">${speedVal || state.speed_limit_car || '—'} km/h</div>
+            </div>
+            <div class="info-box">
+              <div class="ib-label">Night Driving</div>
+              <div class="ib-value" style="font-size:0.8rem;">${state.night_driving_restrictions || 'Check locally'}</div>
+            </div>
+            <div class="info-box">
+              <div class="ib-label">Documents</div>
+              <div class="ib-value" style="font-size:0.8rem;">${state.documents_needed?.length || 4} required</div>
+            </div>
+          </div>
+
+          ${state.key_rules?.length ? `
+          <div>
+            <div class="sec-label">Key Rules</div>
+            <div class="rules-grid">
+              ${state.key_rules.map(r => `<div class="rule-item">${r}</div>`).join('')}
+            </div>
+          </div>` : ''}
+
+          ${state.top_fines?.length ? `
+          <div>
+            <div class="sec-label">Top Fines</div>
+            <table class="fines-table">
+              <tr>
+                <th>Violation</th>
+                <th>Fine Amount</th>
+              </tr>
+              ${state.top_fines.map(f => `
+              <tr>
+                <td>${f.violation}</td>
+                <td class="fine-amt">₹${f.amount?.toLocaleString('en-IN') || '—'}</td>
+              </tr>`).join('')}
+            </table>
+          </div>` : ''}
+
+          ${state.documents_needed?.length ? `
+          <div>
+            <div class="sec-label">Documents Needed</div>
+            <div class="docs-row">
+              ${state.documents_needed.map(d => `<span class="doc-tag">${d}</span>`).join('')}
+            </div>
+          </div>` : ''}
+
+        </div>
+      </div>`;
+    });
+
+    // Safe tips
+    if (data.safe_driving_tips?.length) {
+      html += `
+      <div class="panel-card" style="border-color:rgba(82,196,126,0.3);">
+        <div class="quick-label">💡 Safe Driving Tips</div>
+        <div class="rules-grid" style="margin-top:12px;">
+          ${data.safe_driving_tips.map(t => `<div class="rule-item">${t}</div>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    area.innerHTML = html;
+  }
+
+  // ── ERROR STATE ──
+  function renderError(origin, destination) {
+    document.getElementById('resultsArea').innerHTML = `
+    <div class="warn-banner">
+      <h4>⚠️ Could Not Fetch Legal Briefing</h4>
+      <ul>
+        <li>Make sure the backend is running: <code>python app.py</code></li>
+        <li>Check your internet connection</li>
+        <li>Try again in a moment</li>
+      </ul>
+    </div>
+    <div class="panel-card" style="margin-top:4px;">
+      <div class="quick-label">📋 General Advice for Any Route</div>
+      <div class="rules-grid" style="margin-top:12px;">
+        <div class="rule-item">Always carry DL, RC, Insurance and PUC documents</div>
+        <div class="rule-item">Speed limits vary by state — watch for signs at borders</div>
+        <div class="rule-item">Helmet mandatory for 2-wheelers in all states</div>
+        <div class="rule-item">Seatbelt mandatory for all occupants in cars</div>
+        <div class="rule-item">No mobile phone use while driving — ₹5000 fine</div>
+      </div>
+    </div>`;
+  }
+
+  // ── COLLAPSE/EXPAND ──
+  function toggleState(header) {
+    header.closest('.state-briefing').classList.toggle('collapsed');
+  }
+
+  // Handle Enter key on inputs
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const active = document.activeElement;
+      if (active.id === 'origin' || active.id === 'destination') {
+        getBriefing();
+      }
+    }
+  });
+</script>
+</body>
+</html>

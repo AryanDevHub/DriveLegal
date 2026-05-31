@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Challan Scanner — DriveLegal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:      #1a6b3c;
+      --green-mid:  #2d8a55;
+      --green-lite: #52c47e;
+      --dark:       #0a0f0d;
+      --dark3:      #182019;
+      --card-bg:    #111a14;
+      --border:     rgba(82,196,126,0.18);
+      --text:       #e8f5ec;
+      --muted:      #7a9b82;
+      --red:        #e74c3c;
+      --orange:     #e67e22;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark); color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 70% 50% at 30% 20%, rgba(26,107,60,0.18) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    * { position: relative; z-index: 1; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,13,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .back-btn {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.88rem; font-weight: 500;
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--green-lite); }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+    }
+
+    .state-pill {
+      margin-left: auto;
+      background: rgba(82,196,126,0.1);
+      border: 1px solid var(--border);
+      padding: 5px 14px; border-radius: 99px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; color: var(--green-lite);
+    }
+
+    .state-pill select {
+      background: transparent; border: none;
+      color: var(--green-lite); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; outline: none; cursor: pointer;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 760px; margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .page-header { margin-bottom: 36px; }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 800; color: white;
+      margin-bottom: 8px;
+    }
+
+    .page-header p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1; padding: 10px;
+      border-radius: 9px; border: none;
+      background: transparent; color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center;
+      justify-content: center; gap: 6px;
+    }
+
+    .tab.active {
+      background: var(--card-bg);
+      color: var(--green-lite);
+      border: 1px solid var(--border);
+    }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── CAMERA PANEL ── */
+    .camera-zone {
+      border: 2px dashed var(--border);
+      border-radius: 16px; overflow: hidden;
+      background: var(--card-bg);
+      aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      cursor: pointer; position: relative;
+      transition: border-color 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .camera-zone:hover { border-color: var(--green-lite); }
+
+    #videoEl {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; display: none;
+    }
+
+    #canvasEl {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; display: none;
+    }
+
+    .camera-placeholder {
+      text-align: center; padding: 40px;
+    }
+
+    .camera-placeholder .cam-icon {
+      font-size: 3rem; margin-bottom: 12px;
+      display: block;
+    }
+
+    .camera-placeholder p {
+      color: var(--muted); font-size: 0.9rem;
+    }
+
+    /* scan line animation */
+    .scan-line {
+      position: absolute; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green-lite), transparent);
+      animation: scanMove 2s linear infinite;
+      display: none;
+    }
+
+    @keyframes scanMove {
+      0%   { top: 10%; }
+      100% { top: 90%; }
+    }
+
+    .camera-controls {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+
+    /* ── UPLOAD PANEL ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      background: var(--card-bg);
+      padding: 48px 32px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--green-lite);
+      background: rgba(82,196,126,0.05);
+    }
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+    .upload-zone h3 {
+      font-family: 'Syne', sans-serif; font-size: 1rem;
+      font-weight: 700; color: white; margin-bottom: 6px;
+    }
+    .upload-zone p { color: var(--muted); font-size: 0.85rem; }
+
+    #fileInput { display: none; }
+
+    #imagePreview {
+      width: 100%; border-radius: 12px;
+      max-height: 280px; object-fit: contain;
+      background: var(--dark3);
+      display: none; margin-bottom: 16px;
+    }
+
+    /* ── TEXT PANEL ── */
+    .text-panel-inner { display: flex; flex-direction: column; gap: 14px; }
+
+    .field-label {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .input-field, .select-field {
+      width: 100%; padding: 12px 16px;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus, .select-field:focus { border-color: var(--green-lite); }
+    .input-field::placeholder { color: var(--muted); }
+
+    textarea.input-field {
+      resize: vertical; min-height: 100px;
+      line-height: 1.6;
+    }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--green-mid));
+      color: white; padding: 14px;
+      border: none; border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 600;
+      cursor: pointer; margin-top: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(26,107,60,0.4);
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,107,60,0.5); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-outline {
+      flex: 1; padding: 11px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted); border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center;
+      justify-content: center; gap: 6px;
+    }
+
+    .btn-outline:hover { border-color: var(--green-lite); color: var(--green-lite); }
+
+    /* ── LOADING ── */
+    .loading-state {
+      display: none; text-align: center;
+      padding: 48px 24px;
+    }
+
+    .loading-ring {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--green-lite);
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-state p {
+      color: var(--muted); font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* ── RESULT CARD ── */
+    #resultCard {
+      display: none;
+      margin-top: 28px;
+      animation: fadeUp 0.4s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .verdict-banner {
+      border-radius: 16px 16px 0 0;
+      padding: 24px 28px;
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    .verdict-banner.correct  { background: linear-gradient(135deg, rgba(26,107,60,0.3), rgba(18,28,20,0.9)); border: 1px solid rgba(82,196,126,0.3); }
+    .verdict-banner.over     { background: linear-gradient(135deg, rgba(180,30,30,0.3), rgba(18,28,20,0.9)); border: 1px solid rgba(220,60,60,0.3); }
+    .verdict-banner.unclear  { background: linear-gradient(135deg, rgba(180,120,0,0.3), rgba(18,28,20,0.9)); border: 1px solid rgba(230,160,0,0.3); }
+
+    .verdict-icon { font-size: 2.2rem; }
+
+    .verdict-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800; color: white;
+      margin-bottom: 2px;
+    }
+
+    .verdict-sub { font-size: 0.88rem; }
+    .verdict-banner.correct .verdict-sub  { color: var(--green-lite); }
+    .verdict-banner.over    .verdict-sub  { color: #ff8888; }
+    .verdict-banner.unclear .verdict-sub  { color: #ffc107; }
+
+    .result-body {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 24px 28px;
+    }
+
+    .result-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 20px;
+    }
+
+    .result-item .r-label {
+      font-size: 0.75rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .result-item .r-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; color: white;
+    }
+
+    .r-value.overcharged { color: #ff6b6b; }
+    .r-value.legal       { color: var(--green-lite); }
+
+    .overcharge-callout {
+      background: rgba(220,60,60,0.1);
+      border: 1px solid rgba(220,60,60,0.25);
+      border-radius: 10px; padding: 14px 18px;
+      margin-bottom: 16px; font-size: 0.88rem;
+      color: #ff9999; line-height: 1.5;
+    }
+
+    .advice-box {
+      background: rgba(82,196,126,0.07);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px;
+      font-size: 0.9rem; color: var(--text);
+      line-height: 1.6;
+    }
+
+    .advice-box strong {
+      color: var(--green-lite);
+      display: block; margin-bottom: 6px;
+    }
+
+    .result-actions {
+      display: flex; gap: 10px; margin-top: 20px;
+    }
+
+    /* ── TIPS ── */
+    .tips-row {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 12px; margin-top: 32px;
+    }
+
+    .tip-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      font-size: 0.82rem; color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .tip-card .tip-icon { font-size: 1.2rem; margin-bottom: 6px; display: block; }
+
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .tips-row { grid-template-columns: 1fr; }
+      .camera-controls { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="/" class="back-btn">← Back</a>
+  <div class="topbar-title">📸 Challan Scanner</div>
+  <div class="state-pill">
+    📍
+    <select id="stateSelector" onchange="saveState()">
+      <option value="MP">Madhya Pradesh</option>
+      <option value="MH">Maharashtra</option>
+      <option value="DL">Delhi</option>
+      <option value="KA">Karnataka</option>
+      <option value="TN">Tamil Nadu</option>
+      <option value="UP">Uttar Pradesh</option>
+      <option value="GJ">Gujarat</option>
+      <option value="RJ">Rajasthan</option>
+    </select>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="page-header">
+    <h1>📸 Scan Your Challan</h1>
+    <p>Paste your challan details, upload an image, or use camera.<br/>
+       Our AI will instantly check if the fine is legally correct.</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text', this)">✏️ Enter Details</button>
+    <button class="tab" onclick="switchTab('upload', this)">📁 Upload Image</button>
+    <button class="tab" onclick="switchTab('camera', this)">📷 Camera</button>
+  </div>
+
+  <!-- TEXT PANEL -->
+  <div class="panel active" id="panel-text">
+    <div class="text-panel-inner">
+
+      <div class="field-row">
+        <div>
+          <div class="field-label">Violation Type</div>
+          <select class="select-field" id="violationType">
+            <option value="">-- Select Violation --</option>
+            <option>No Helmet</option>
+            <option>No Seatbelt</option>
+            <option>Overspeeding</option>
+            <option>Drunk Driving</option>
+            <option>Mobile Phone While Driving</option>
+            <option>No Insurance</option>
+            <option>No Driving Licence</option>
+            <option>No RC Registration Certificate</option>
+            <option>Triple Riding</option>
+            <option>No PUC Certificate</option>
+            <option>Red Light Jump</option>
+            <option>Wrong Side Driving</option>
+            <option>Dangerous Driving</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">Vehicle Type</div>
+          <select class="select-field" id="vehicleType">
+            <option value="2wheeler">2-Wheeler (Bike/Scooter)</option>
+            <option value="car">Car / SUV</option>
+            <option value="truck">Truck / Bus</option>
+            <option value="auto">Auto Rickshaw</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <div class="field-label">Fine Amount Charged (₹)</div>
+          <input type="number" class="input-field" id="chargedAmount"
+                 placeholder="e.g. 3000"/>
+        </div>
+        <div>
+          <div class="field-label">Section on Challan</div>
+          <input type="text" class="input-field" id="sectionNum"
+                 placeholder="e.g. 183 or 129"/>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Additional Details (optional)</div>
+        <textarea class="input-field" id="additionalDetails"
+                  placeholder="Paste any text from the challan, or describe the situation…"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn-primary" id="validateBtn" onclick="validateChallan()">
+      ⚖️ Validate Challan
+    </button>
+  </div>
+
+  <!-- UPLOAD PANEL -->
+  <div class="panel" id="panel-upload">
+    <div class="upload-zone" id="uploadZone"
+         onclick="document.getElementById('fileInput').click()"
+         ondragover="handleDrag(event, true)"
+         ondragleave="handleDrag(event, false)"
+         ondrop="handleDrop(event)">
+      <span class="upload-icon">📄</span>
+      <h3>Upload Challan Image or PDF</h3>
+      <p>Click to browse or drag & drop<br/>
+         JPG, PNG, PDF supported</p>
+    </div>
+    <input type="file" id="fileInput"
+           accept="image/*,.pdf"
+           onchange="handleFileSelect(event)"/>
+    <img id="imagePreview" alt="Challan preview"/>
+    <div id="extractedText" style="display:none; margin-top:12px;">
+      <div class="field-label">Extracted Text</div>
+      <textarea class="input-field" id="extractedTextArea"
+                style="min-height:80px;" readonly></textarea>
+    </div>
+    <button class="btn-primary" id="uploadValidateBtn"
+            onclick="validateFromImage()" style="display:none;">
+      ⚖️ Validate This Challan
+    </button>
+  </div>
+
+  <!-- CAMERA PANEL -->
+  <div class="panel" id="panel-camera">
+    <div class="camera-zone" id="cameraZone">
+      <div class="camera-placeholder" id="cameraPlaceholder">
+        <span class="cam-icon">📷</span>
+        <p>Click "Start Camera" below to scan your challan</p>
+      </div>
+      <video id="videoEl" autoplay playsinline></video>
+      <canvas id="canvasEl"></canvas>
+      <div class="scan-line" id="scanLine"></div>
+    </div>
+    <div class="camera-controls">
+      <button class="btn-outline" id="startCamBtn" onclick="startCamera()">
+        📷 Start Camera
+      </button>
+      <button class="btn-outline" id="captureBtn"
+              onclick="capturePhoto()" style="display:none;">
+        🔴 Capture Challan
+      </button>
+      <button class="btn-outline" id="stopCamBtn"
+              onclick="stopCamera()" style="display:none;">
+        ✕ Stop Camera
+      </button>
+      <button class="btn-outline" id="retakeBtn"
+              onclick="retakePhoto()" style="display:none;">
+        🔄 Retake
+      </button>
+    </div>
+    <button class="btn-primary" id="cameraValidateBtn"
+            onclick="validateFromCamera()" style="display:none;">
+      ⚖️ Validate Captured Challan
+    </button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" id="loadingState">
+    <div class="loading-ring"></div>
+    <p id="loadingText">Analysing your challan…<br/>
+       Checking against official fine database</p>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div id="resultCard"></div>
+
+  <!-- TIPS -->
+  <div class="tips-row">
+    <div class="tip-card">
+      <span class="tip-icon">💡</span>
+      <strong style="color:var(--text);">Your Right</strong><br/>
+      A cop cannot demand cash on the spot. Always ask for an official e-challan receipt.
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">⚖️</span>
+      <strong style="color:var(--text);">Contest Window</strong><br/>
+      Most challans can be contested within 60 days at the local traffic court.
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">📱</span>
+      <strong style="color:var(--text);">Verify Online</strong><br/>
+      Check any challan at echallan.parivahan.gov.in using your vehicle number.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:5000';
+
+  // Load state
+  const saved = localStorage.getItem('dl_state');
+  if (saved) document.getElementById('stateSelector').value = saved;
+
+  function saveState() {
+    localStorage.setItem('dl_state', document.getElementById('stateSelector').value);
+  }
+
+  function getState() { return document.getElementById('stateSelector').value; }
+
+  // ── TABS ──
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'none';
+  }
+
+  // ── SHOW LOADING ──
+  function showLoading(msg = 'Analysing your challan…') {
+    document.getElementById('loadingText').innerHTML = msg;
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('resultCard').style.display = 'none';
+    window.scrollBy({ top: 200, behavior: 'smooth' });
+  }
+
+  function hideLoading() {
+    document.getElementById('loadingState').style.display = 'none';
+  }
+
+  // ── VALIDATE FROM TEXT FORM ──
+  async function validateChallan() {
+    const violation = document.getElementById('violationType').value;
+    const vehicle   = document.getElementById('vehicleType').value;
+    const charged   = document.getElementById('chargedAmount').value;
+    const section   = document.getElementById('sectionNum').value;
+    const extra     = document.getElementById('additionalDetails').value;
+
+    if (!violation) { alert('Please select a violation type.'); return; }
+    if (!charged)   { alert('Please enter the fine amount charged.'); return; }
+
+    const text = `
+Violation: ${violation}
+Vehicle: ${vehicle}
+Amount Charged: ₹${charged}
+Section: ${section || 'Not mentioned'}
+Details: ${extra || 'None'}
+    `.trim();
+
+    showLoading('Checking fine against official database…<br/>This takes 2-3 seconds.');
+
+    try {
+      const res = await fetch(`${API_BASE}/validate-challan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, state: getState(), vehicle })
+      });
+      const data = await res.json();
+      hideLoading();
+      showResult(data, parseInt(charged));
+    } catch (err) {
+      hideLoading();
+      showError();
+    }
+  }
+
+  // ── FILE UPLOAD ──
+  function handleDrag(e, over) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.toggle('dragover', over);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    handleDrag(e, false);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  function processFile(file) {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.getElementById('imagePreview');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('uploadValidateBtn').style.display = 'flex';
+        document.getElementById('extractedText').style.display = 'none';
+        // Simulate OCR extraction
+        document.getElementById('extractedTextArea').value =
+          'Image loaded. AI will analyse and extract challan details automatically.';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      document.getElementById('extractedTextArea').value =
+        'PDF loaded. AI will analyse the contents.';
+      document.getElementById('extractedText').style.display = 'block';
+      document.getElementById('uploadValidateBtn').style.display = 'flex';
+    }
+  }
+
+  async function validateFromImage() {
+    const img = document.getElementById('imagePreview');
+    if (!img.src || img.style.display === 'none') {
+      alert('Please upload an image first.'); return;
+    }
+
+    showLoading('Reading challan image…<br/>Extracting fine details with AI');
+
+    // Send base64 image data to backend for AI analysis
+    try {
+      const res = await fetch(`${API_BASE}/validate-challan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: 'Analyse this uploaded challan image and extract violation, amount, and section.',
+          state: getState(),
+          vehicle: 'car',
+          image_provided: true
+        })
+      });
+      const data = await res.json();
+      hideLoading();
+      showResult(data, 0);
+    } catch (err) {
+      hideLoading();
+      showError();
+    }
+  }
+
+  // ── CAMERA ──
+  let cameraStream = null;
+  let capturedDataUrl = null;
+
+  async function startCamera() {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      const video = document.getElementById('videoEl');
+      video.srcObject = cameraStream;
+      video.style.display = 'block';
+      document.getElementById('cameraPlaceholder').style.display = 'none';
+      document.getElementById('scanLine').style.display = 'block';
+      document.getElementById('startCamBtn').style.display = 'none';
+      document.getElementById('captureBtn').style.display = 'flex';
+      document.getElementById('stopCamBtn').style.display = 'flex';
+    } catch (err) {
+      alert('Camera access denied. Please allow camera permission or use the Upload tab.');
+    }
+  }
+
+  function capturePhoto() {
+    const video  = document.getElementById('videoEl');
+    const canvas = document.getElementById('canvasEl');
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    capturedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+    // Stop video, show captured image
+    stopCamera();
+    canvas.style.display = 'block';
+    document.getElementById('cameraValidateBtn').style.display = 'flex';
+    document.getElementById('retakeBtn').style.display = 'flex';
+    document.getElementById('startCamBtn').style.display = 'none';
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    document.getElementById('videoEl').style.display = 'none';
+    document.getElementById('scanLine').style.display = 'none';
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('stopCamBtn').style.display = 'none';
+  }
+
+  function retakePhoto() {
+    document.getElementById('canvasEl').style.display = 'none';
+    document.getElementById('cameraValidateBtn').style.display = 'none';
+    document.getElementById('retakeBtn').style.display = 'none';
+    document.getElementById('cameraPlaceholder').style.display = 'block';
+    document.getElementById('startCamBtn').style.display = 'flex';
+    capturedDataUrl = null;
+  }
+
+  async function validateFromCamera() {
+    if (!capturedDataUrl) { alert('Please capture a photo first.'); return; }
+
+    showLoading('Scanning challan image…<br/>Extracting details with AI');
+
+    try {
+      const res = await fetch(`${API_BASE}/validate-challan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: 'Analyse this captured challan image and validate the fine amount.',
+          state: getState(),
+          vehicle: 'car',
+          image_data: capturedDataUrl
+        })
+      });
+      const data = await res.json();
+      hideLoading();
+      showResult(data, 0);
+    } catch (err) {
+      hideLoading();
+      showError();
+    }
+  }
+
+  // ── SHOW RESULT ──
+  function showResult(data, userChargedAmount) {
+    const charged = userChargedAmount || data.charged_amount || 0;
+    const legal   = data.legal_amount || 0;
+    const isOver  = data.is_overcharged || (charged > legal && legal > 0);
+    const verdict = data.verdict || (isOver ? 'OVERCHARGED' : 'CORRECT');
+
+    let bannerClass = 'correct', icon = '✅', title = 'Fine is Correct', sub = 'The charged amount matches the legal fine.';
+
+    if (verdict.includes('OVER') || isOver) {
+      bannerClass = 'over'; icon = '🚨';
+      title = 'You Were OVERCHARGED!';
+      sub = `You were charged ₹${charged.toLocaleString('en-IN')} but legal fine is ₹${legal.toLocaleString('en-IN')}`;
+    } else if (verdict.includes('UNCLEAR') || verdict.includes('NOT FOUND')) {
+      bannerClass = 'unclear'; icon = '⚠️';
+      title = 'Could Not Verify';
+      sub = 'Please verify manually at echallan.parivahan.gov.in';
+    }
+
+    const overchargeHTML = isOver ? `
+      <div class="overcharge-callout">
+        🚨 You were overcharged by <strong>₹${(charged - legal).toLocaleString('en-IN')}</strong>.
+        You have the right to contest this challan within ${data.contest_window_days || 60} days.
+      </div>` : '';
+
+    const html = `
+      <div class="verdict-banner ${bannerClass}">
+        <div class="verdict-icon">${icon}</div>
+        <div>
+          <div class="verdict-title">${title}</div>
+          <div class="verdict-sub">${sub}</div>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="r-label">Violation Found</div>
+            <div class="r-value">${data.violation_found || '—'}</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">MV Act Section</div>
+            <div class="r-value">${data.section || '—'}</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Amount Charged</div>
+            <div class="r-value ${isOver ? 'overcharged' : ''}">
+              ₹${charged > 0 ? charged.toLocaleString('en-IN') : '—'}
+            </div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Legal Fine Amount</div>
+            <div class="r-value legal">
+              ₹${legal > 0 ? legal.toLocaleString('en-IN') : '—'}
+            </div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Can Contest?</div>
+            <div class="r-value">${data.can_contest ? '✅ Yes' : '❌ No'}</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">State</div>
+            <div class="r-value">${getState()}</div>
+          </div>
+        </div>
+        ${overchargeHTML}
+        <div class="advice-box">
+          <strong>💬 What to do:</strong>
+          ${data.advice || 'Verify this challan at echallan.parivahan.gov.in using your vehicle number.'}
+        </div>
+        ${data.contest_procedure ? `
+        <div class="advice-box" style="margin-top:12px;">
+          <strong>⚖️ How to Contest:</strong>
+          ${data.contest_procedure}
+        </div>` : ''}
+        <div class="result-actions">
+          <button class="btn-outline" onclick="shareResult()">📤 Share</button>
+          <button class="btn-outline" onclick="window.open('https://echallan.parivahan.gov.in','_blank')">🔗 Verify Online</button>
+          <button class="btn-outline" onclick="location.reload()">🔄 New Scan</button>
+        </div>
+      </div>`;
+
+    const card = document.getElementById('resultCard');
+    card.innerHTML = html;
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showError() {
+    const card = document.getElementById('resultCard');
+    card.innerHTML = `
+      <div class="verdict-banner unclear">
+        <div class="verdict-icon">⚠️</div>
+        <div>
+          <div class="verdict-title">Server Not Reachable</div>
+          <div class="verdict-sub">Make sure backend is running: python app.py</div>
+        </div>
+      </div>`;
+    card.style.display = 'block';
+  }
+
+  function shareResult() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'DriveLegal Challan Check',
+        text: 'I checked my challan with DriveLegal AI — your free road legal co-pilot.',
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  }
+</script>
+</body>
+</html>

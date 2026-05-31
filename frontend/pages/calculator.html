@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fine Calculator — DriveLegal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:      #1a6b3c;
+      --green-mid:  #2d8a55;
+      --green-lite: #52c47e;
+      --dark:       #0a0f0d;
+      --dark2:      #0e1510;
+      --dark3:      #182019;
+      --card-bg:    #111a14;
+      --border:     rgba(82,196,126,0.18);
+      --text:       #e8f5ec;
+      --muted:      #7a9b82;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark); color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 20%, rgba(26,107,60,0.2) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 85% 75%, rgba(45,138,85,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    * { position: relative; z-index: 1; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,13,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .back-btn {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.88rem; font-weight: 500;
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--green-lite); }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+    }
+
+    .state-pill {
+      margin-left: auto;
+      background: rgba(82,196,126,0.1);
+      border: 1px solid var(--border);
+      padding: 5px 14px; border-radius: 99px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; color: var(--green-lite);
+    }
+
+    .state-pill select {
+      background: transparent; border: none;
+      color: var(--green-lite); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; outline: none; cursor: pointer;
+    }
+
+    .page-wrap {
+      max-width: 960px; margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 28px; align-items: start;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+
+    .card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 800;
+      color: white; margin-bottom: 6px;
+    }
+
+    .card .sub {
+      color: var(--muted); font-size: 0.88rem;
+      margin-bottom: 24px; line-height: 1.5;
+    }
+
+    .field-label {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      display: block;
+    }
+
+    .select-field {
+      width: 100%; padding: 11px 14px;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem; outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 16px; appearance: none;
+    }
+
+    .select-field:focus { border-color: var(--green-lite); }
+
+    .toggle-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+      margin-bottom: 20px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .toggle-row:hover { border-color: var(--green-lite); }
+    .toggle-row-label span { font-size: 0.9rem; font-weight: 500; color: var(--text); display: block; }
+    .toggle-row-label small { font-size: 0.78rem; color: var(--muted); }
+
+    .toggle {
+      width: 44px; height: 24px;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 99px; position: relative;
+      transition: background 0.2s; flex-shrink: 0;
+    }
+    .toggle.on { background: var(--green); border-color: var(--green-mid); }
+    .toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--muted); transition: transform 0.2s, background 0.2s;
+    }
+    .toggle.on::after { transform: translateX(20px); background: white; }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--green-mid));
+      color: white; padding: 14px; border: none; border-radius: 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(26,107,60,0.4);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,107,60,0.5); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .quick-label {
+      font-size: 0.75rem; font-weight: 600; color: var(--muted);
+      margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+    }
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-chip {
+      background: var(--dark3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; font-size: 0.82rem;
+      color: var(--muted); cursor: pointer; text-align: center;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .quick-chip:hover {
+      border-color: var(--green-lite); color: var(--green-lite);
+      background: rgba(82,196,126,0.06);
+    }
+
+    .right-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    .empty-state {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 60px 32px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .empty-icon { font-size: 3rem; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: white; }
+    .empty-state p { color: var(--muted); font-size: 0.88rem; max-width: 280px; line-height: 1.6; }
+
+    .loading-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px; text-align: center; display: none;
+    }
+    .loading-ring {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--green-lite);
+      animation: spin 0.9s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card p { color: var(--muted); font-size: 0.9rem; }
+
+    #resultCard { display: none; animation: fadeUp 0.4s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fine-hero {
+      background: linear-gradient(135deg, rgba(26,107,60,0.3), rgba(14,21,16,0.95));
+      border: 1px solid rgba(82,196,126,0.3);
+      border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 16px;
+    }
+    .fine-hero .violation-name {
+      font-size: 0.8rem; font-weight: 600; color: var(--green-lite);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+    }
+    .fine-hero .hindi-name { font-size: 1rem; color: var(--muted); margin-bottom: 16px; }
+    .fine-amount {
+      font-family: 'Syne', sans-serif; font-size: 3.2rem; font-weight: 800;
+      color: white; line-height: 1; margin-bottom: 6px;
+    }
+    .fine-amount.repeat { color: #ff8888; }
+    .fine-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; }
+    .fine-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 99px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-green { background: rgba(82,196,126,0.15); border: 1px solid rgba(82,196,126,0.3); color: var(--green-lite); }
+    .badge-red   { background: rgba(220,60,60,0.15);  border: 1px solid rgba(220,60,60,0.3);  color: #ff8888; }
+    .badge-orange{ background: rgba(230,126,34,0.15); border: 1px solid rgba(230,126,34,0.3); color: #ffb347; }
+
+    .detail-grid { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
+    .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid rgba(82,196,126,0.07); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .d-label { font-size: 0.83rem; color: var(--muted); }
+    .detail-row .d-value { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+    .d-value.green { color: var(--green-lite); }
+    .d-value.red   { color: #ff8888; }
+
+    .repeat-box {
+      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: none;
+    }
+    .repeat-box h4 { font-family: 'Syne', sans-serif; font-size: 0.9rem; color: #ff8888; margin-bottom: 8px; }
+    .repeat-box p  { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+    .imprisonment-box {
+      background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.25);
+      border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: none;
+      font-size: 0.85rem; color: #ffb347; line-height: 1.5;
+    }
+
+    .all-vehicles { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .av-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .av-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(82,196,126,0.07); }
+    .av-row:last-child { border-bottom: none; }
+    .av-row.active { background: rgba(82,196,126,0.06); }
+    .av-vehicle { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text); }
+    .av-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--dark3); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .av-fine { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--green-lite); }
+    .av-fine.na { color: var(--muted); font-size: 0.82rem; font-family: 'DM Sans', sans-serif; font-weight: 400; }
+
+    .source-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 0.8rem; color: var(--muted); display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+
+    .result-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-outline {
+      flex: 1; padding: 11px; background: transparent;
+      border: 1px solid var(--border); color: var(--muted); border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-outline:hover { border-color: var(--green-lite); color: var(--green-lite); }
+
+    @media (max-width: 800px) {
+      .page-wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="back-btn">← Back</a>
+  <div class="topbar-title">🧮 Fine Calculator</div>
+  <div class="state-pill">
+    📍
+    <!-- FIX: use correct state codes matching fines.json -->
+    <select id="stateSelector" onchange="saveState()">
+      <option value="MP">Madhya Pradesh</option>
+      <option value="MH">Maharashtra</option>
+      <option value="DL">Delhi</option>
+      <option value="KA">Karnataka</option>
+      <option value="TN">Tamil Nadu</option>
+      <option value="UP">Uttar Pradesh</option>
+      <option value="GJ">Gujarat</option>
+      <option value="RJ">Rajasthan</option>
+      <option value="AP">Andhra Pradesh</option>
+      <option value="TS">Telangana</option>
+    </select>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- LEFT: Input -->
+  <div>
+    <div class="card" style="margin-bottom:20px;">
+      <h2>🧮 Calculate Fine</h2>
+      <p class="sub">Select violation, vehicle type and state — get the exact legal fine instantly.</p>
+
+      <label class="field-label">Violation Type</label>
+      <select class="select-field" id="violation">
+        <option value="">— Select Violation —</option>
+        <option value="No helmet (rider + pillion)">🪖 No Helmet</option>
+        <option value="No seat belt">🪢 No Seatbelt</option>
+        <option value="Overspeeding">🚀 Overspeeding</option>
+        <option value="Drunk driving (DUI)">🍺 Drunk Driving</option>
+        <option value="Using mobile phone while driving">📱 Mobile Phone While Driving</option>
+        <option value="Driving without insurance">🛡️ No Insurance</option>
+        <option value="Driving without licence">📋 No Driving Licence</option>
+        <option value="Driving without registration">📄 No RC / Registration</option>
+        <option value="Driving without PUC (pollution certificate)">💨 No PUC Certificate</option>
+        <option value="Dangerous driving / Red light jumping">🚦 Red Light / Dangerous Driving</option>
+        <option value="Wrong side driving">↩️ Wrong Side Driving</option>
+        <option value="Overloading (weight)">⚖️ Overloading</option>
+        <option value="Excess passengers">👥 Excess Passengers</option>
+        <option value="Illegal parking / obstruction">🅿️ Illegal Parking</option>
+        <option value="Racing on public road">🏎️ Racing on Road</option>
+        <option value="Horn in silence zone">📢 Horn in Silence Zone</option>
+        <option value="Not giving way to emergency vehicle">🚑 Not Giving Way to Emergency</option>
+        <option value="Hit and run / not reporting accident">💥 Hit and Run</option>
+        <option value="Juvenile driving (owner/guardian liability)">👦 Juvenile Driving</option>
+        <option value="Allowing unauthorised person to drive">🔑 Unauthorised Person Driving</option>
+        <option value="Driving while disqualified">🚫 Driving While Disqualified</option>
+        <option value="Driving without permit (transport vehicles)">📜 No Permit (Transport)</option>
+        <option value="Vehicle in unsafe/polluting condition">🔧 Unsafe / Polluting Vehicle</option>
+        <option value="Not wearing reflective jacket (commercial vehicles)">🦺 No Reflective Jacket</option>
+        <option value="Overhanging load">📦 Overhanging Load</option>
+      </select>
+
+      <label class="field-label">Vehicle Type</label>
+      <select class="select-field" id="vehicle">
+        <option value="2wheeler">🏍️ 2-Wheeler (Bike / Scooter)</option>
+        <option value="car" selected>🚗 Car / SUV</option>
+        <option value="auto">🛺 Auto Rickshaw</option>
+        <option value="truck">🚛 Truck / Bus / HMV</option>
+      </select>
+
+      <div class="toggle-row" onclick="toggleRepeat()" id="repeatRow">
+        <div class="toggle-row-label">
+          <span>Repeat Offence</span>
+          <small>Higher fine for second/subsequent violation</small>
+        </div>
+        <div class="toggle" id="repeatToggle"></div>
+      </div>
+
+      <button class="btn-primary" id="calcBtn" onclick="calculate()">
+        🧮 Calculate Fine
+      </button>
+    </div>
+
+    <!-- Quick violations -->
+    <div class="card">
+      <div class="quick-label">⚡ Quick Select</div>
+      <div class="quick-grid">
+        <div class="quick-chip" onclick="quickSet('No helmet (rider + pillion)')">🪖 No Helmet</div>
+        <div class="quick-chip" onclick="quickSet('Overspeeding')">🚀 Overspeeding</div>
+        <div class="quick-chip" onclick="quickSet('Drunk driving (DUI)')">🍺 Drunk Driving</div>
+        <div class="quick-chip" onclick="quickSet('Using mobile phone while driving')">📱 Phone Use</div>
+        <div class="quick-chip" onclick="quickSet('Driving without insurance')">🛡️ No Insurance</div>
+        <div class="quick-chip" onclick="quickSet('Driving without licence')">📋 No Licence</div>
+        <div class="quick-chip" onclick="quickSet('Driving without PUC (pollution certificate)')">💨 No PUC</div>
+        <div class="quick-chip" onclick="quickSet('Dangerous driving / Red light jumping')">🚦 Red Light</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Result -->
+  <div class="right-panel">
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🧮</div>
+      <h3>Select a violation</h3>
+      <p>Choose violation, vehicle type and your state — then tap Calculate Fine.</p>
+    </div>
+
+    <div class="loading-card" id="loadingCard">
+      <div class="loading-ring"></div>
+      <p>Fetching fine from database…</p>
+    </div>
+
+    <div id="resultCard">
+
+      <!-- Fine hero -->
+      <div class="fine-hero" id="fineHero">
+        <div class="violation-name" id="resViolation">—</div>
+        <div class="hindi-name"    id="resHindi">—</div>
+        <div class="fine-amount"   id="resFine">₹0</div>
+        <div class="fine-label"    id="fineLabel">Base fine</div>
+        <div class="fine-badges"   id="fineBadges"></div>
+      </div>
+
+      <!-- Detail rows -->
+      <div class="detail-grid" id="detailGrid"></div>
+
+      <!-- Repeat offence box -->
+      <div class="repeat-box" id="repeatBox">
+        <h4>⚠️ Repeat Offence — Higher Fine Applied</h4>
+        <p id="repeatBoxText"></p>
+      </div>
+
+      <!-- Imprisonment warning -->
+      <div class="imprisonment-box" id="imprisonmentBox">
+        ⚖️ <span id="imprisonmentText"></span>
+      </div>
+
+      <!-- All vehicles table -->
+      <div class="all-vehicles" id="allVehicles">
+        <div class="av-header">Fine by Vehicle Type — <span id="avState"></span></div>
+        <div id="avRows"></div>
+      </div>
+
+      <!-- Source -->
+      <div class="source-box" style="margin-top:16px;" id="sourceBox">
+        <span>📌</span>
+        <span id="sourceText">—</span>
+      </div>
+
+      <!-- Notes -->
+      <div id="notesBox" style="display:none;margin-top:12px;">
+        <div class="source-box" style="border-color:rgba(82,196,126,0.25);">
+          <span>📝</span>
+          <span id="notesText" style="color:var(--text);font-size:0.82rem;"></span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="result-actions">
+        <button class="btn-outline" onclick="shareResult()">📤 Share</button>
+        <button class="btn-outline" onclick="window.open('https://echallan.parivahan.gov.in','_blank')">🔗 Verify</button>
+        <button class="btn-outline" onclick="window.location.href='chatbot.html'">💬 Ask AI</button>
+        <button class="btn-outline" onclick="resetCalc()">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:5000';
+  let isRepeat  = false;
+  let lastResult = null;
+
+  // FIX: correct state code to name mapping
+  const STATE_NAMES = {
+    'MP': 'Madhya Pradesh', 'MH': 'Maharashtra',
+    'DL': 'Delhi',          'KA': 'Karnataka',
+    'TN': 'Tamil Nadu',     'UP': 'Uttar Pradesh',
+    'GJ': 'Gujarat',        'RJ': 'Rajasthan',
+    'AP': 'Andhra Pradesh', 'TS': 'Telangana'
+  };
+
+  // Load saved state
+  const saved = localStorage.getItem('dl_state');
+  if (saved && document.querySelector(`#stateSelector option[value="${saved}"]`)) {
+    document.getElementById('stateSelector').value = saved;
+  }
+
+  function saveState() {
+    const val = document.getElementById('stateSelector').value;
+    localStorage.setItem('dl_state', val);
+    if (lastResult) calculate();
+  }
+
+  function getState() { return document.getElementById('stateSelector').value; }
+
+  function toggleRepeat() {
+    isRepeat = !isRepeat;
+    document.getElementById('repeatToggle').classList.toggle('on', isRepeat);
+    if (lastResult) calculate();
+  }
+
+  function quickSet(violation) {
+    document.getElementById('violation').value = violation;
+    calculate();
+  }
+
+  function resetCalc() {
+    document.getElementById('resultCard').style.display  = 'none';
+    document.getElementById('emptyState').style.display  = 'flex';
+    document.getElementById('emptyState').querySelector('h3').textContent = 'Select a violation';
+    document.getElementById('emptyState').querySelector('p').textContent  = 'Choose violation, vehicle type and your state — then tap Calculate Fine.';
+    lastResult = null;
+  }
+
+  async function calculate() {
+    const violation = document.getElementById('violation').value;
+    const vehicle   = document.getElementById('vehicle').value;
+    const state     = getState();
+
+    if (!violation) { alert('Please select a violation.'); return; }
+
+    document.getElementById('emptyState').style.display  = 'none';
+    document.getElementById('resultCard').style.display  = 'none';
+    document.getElementById('loadingCard').style.display = 'block';
+    document.getElementById('calcBtn').disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/calculate`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ violation, state, vehicle, repeat: isRepeat })
+      });
+
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('calcBtn').disabled = false;
+
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      lastResult = data;
+      renderResult(data, vehicle, state);
+
+    } catch (err) {
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('calcBtn').disabled = false;
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('emptyState').querySelector('h3').textContent = '⚠️ Server not reachable';
+      document.getElementById('emptyState').querySelector('p').textContent  = 'Make sure backend is running: python app.py';
+    }
+  }
+
+  function renderResult(d, vehicle, state) {
+    // Violation name + Hindi
+    document.getElementById('resViolation').textContent = d.violation || '—';
+    document.getElementById('resHindi').textContent     = d.hindi || '';
+
+    // Fine amount
+    const fineEl = document.getElementById('resFine');
+    fineEl.textContent = '₹' + (d.final_fine || 0).toLocaleString('en-IN');
+    fineEl.className   = 'fine-amount' + (isRepeat ? ' repeat' : '');
+    document.getElementById('fineLabel').textContent =
+      isRepeat ? 'Repeat offence fine' : 'First offence fine — ' + (STATE_NAMES[state] || state);
+
+    // Badges
+    const badges = [];
+    if (!d.can_contest) {
+      badges.push(`<span class="badge badge-red">❌ Non-Contestable</span>`);
+    } else {
+      badges.push(`<span class="badge badge-green">✅ Contestable (${d.contest_days || 60} days)</span>`);
+    }
+    if (d.can_seize) {
+      badges.push(`<span class="badge badge-orange">⚠️ Vehicle Seizure Possible</span>`);
+    }
+    if (d.verified) {
+      badges.push(`<span class="badge badge-green">✔ Verified Source</span>`);
+    }
+    document.getElementById('fineBadges').innerHTML = badges.join('');
+
+    // Detail grid
+    document.getElementById('detailGrid').innerHTML = `
+      <div class="detail-row">
+        <div class="d-label">📋 MV Act Section</div>
+        <div class="d-value green">Section ${d.section || '—'}</div>
+      </div>
+      <div class="detail-row">
+        <div class="d-label">🗺️ State</div>
+        <div class="d-value">${STATE_NAMES[state] || state}</div>
+      </div>
+      <div class="detail-row">
+        <div class="d-label">🚗 Vehicle Type</div>
+        <div class="d-value">${vehicleLabel(vehicle)}</div>
+      </div>
+      <div class="detail-row">
+        <div class="d-label">💰 First Offence Fine</div>
+        <div class="d-value green">₹${(d.base_fine || 0).toLocaleString('en-IN')}</div>
+      </div>
+      ${d.repeat_fine && d.repeat_fine > 0 ? `
+      <div class="detail-row">
+        <div class="d-label">🔁 Repeat Offence Fine</div>
+        <div class="d-value red">₹${d.repeat_fine.toLocaleString('en-IN')}</div>
+      </div>` : ''}
+    `;
+
+    // Repeat box
+    const repeatBox = document.getElementById('repeatBox');
+    if (isRepeat && d.final_fine !== d.base_fine) {
+      repeatBox.style.display = 'block';
+      document.getElementById('repeatBoxText').textContent =
+        `First offence: ₹${(d.base_fine||0).toLocaleString('en-IN')} → Repeat offence: ₹${(d.final_fine||0).toLocaleString('en-IN')} under Section ${d.section} of the MV Act.`;
+    } else {
+      repeatBox.style.display = 'none';
+    }
+
+    // Imprisonment warning
+    const impBox  = document.getElementById('imprisonmentBox');
+    const impText = d.imprisonment;
+    if (impText && impText !== 'none' && impText !== 'None') {
+      impBox.style.display = 'flex';
+      document.getElementById('imprisonmentText').textContent = `Imprisonment: ${impText}`;
+    } else {
+      impBox.style.display = 'none';
+    }
+
+    // Notes
+    const notesBox = document.getElementById('notesBox');
+    if (d.notes) {
+      notesBox.style.display = 'block';
+      document.getElementById('notesText').textContent = d.notes;
+    } else {
+      notesBox.style.display = 'none';
+    }
+
+    // All vehicles table
+    document.getElementById('avState').textContent = STATE_NAMES[state] || state;
+    buildVehicleTable(d.violation, state, vehicle);
+
+    // Source
+    document.getElementById('sourceText').textContent =
+      `Source: ${d.source || 'echallan.parivahan.gov.in'} · Always verify at echallan.parivahan.gov.in`;
+
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function buildVehicleTable(violation, state, activeVehicle) {
+    const vehicles = [
+      { key: '2wheeler', icon: '🏍️', label: '2-Wheeler' },
+      { key: 'car',      icon: '🚗', label: 'Car / SUV'  },
+      { key: 'auto',     icon: '🛺', label: 'Auto'       },
+      { key: 'truck',    icon: '🚛', label: 'Truck / Bus'}
+    ];
+
+    const fines = {};
+    await Promise.all(vehicles.map(async v => {
+      try {
+        const res = await fetch(`${API_BASE}/calculate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ violation, state, vehicle: v.key, repeat: false })
+        });
+        const d = await res.json();
+        fines[v.key] = d.base_fine || 0;
+      } catch { fines[v.key] = 0; }
+    }));
+
+    let html = '';
+    vehicles.forEach(v => {
+      const fine     = fines[v.key];
+      const isActive = v.key === activeVehicle;
+      html += `
+        <div class="av-row ${isActive ? 'active' : ''}">
+          <div class="av-vehicle">
+            <div class="av-icon">${v.icon}</div>
+            ${v.label}
+            ${isActive ? '<span style="color:var(--green-lite);font-size:0.72rem;margin-left:6px;">← selected</span>' : ''}
+          </div>
+          <div class="av-fine ${fine === 0 ? 'na' : ''}">
+            ${fine > 0 ? '₹' + fine.toLocaleString('en-IN') : 'N/A'}
+          </div>
+        </div>`;
+    });
+    document.getElementById('avRows').innerHTML = html;
+  }
+
+  function vehicleLabel(v) {
+    const map = { '2wheeler': '2-Wheeler', 'car': 'Car / SUV', 'auto': 'Auto Rickshaw', 'truck': 'Truck / Bus' };
+    return map[v] || v;
+  }
+
+  function shareResult() {
+    const v    = document.getElementById('resViolation').textContent;
+    const f    = document.getElementById('resFine').textContent;
+    const s    = STATE_NAMES[getState()] || getState();
+    const text = `DriveLegal Fine Calculator\n${v}\nLegal fine in ${s}: ${f}\nVerify: echallan.parivahan.gov.in`;
+    if (navigator.share) {
+      navigator.share({ title: 'DriveLegal Fine', text, url: window.location.href });
+    } else {
+      navigator.clipboard.writeText(text);
+      alert('Result copied to clipboard!');
+    }
+  }
+
+  // Auto-recalculate when dropdowns change
+  document.getElementById('vehicle').addEventListener('change', () => {
+    if (document.getElementById('violation').value) calculate();
+  });
+</script>
+</body>
+</html>

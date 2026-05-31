@@ -1,0 +1,891 @@
+
+
+
+{
+  "routes": [
+    {
+      "id": "R001",
+      "name": "Indore to Mumbai",
+      "origin": "Indore",
+      "destination": "Mumbai",
+      "distance_km": 597,
+      "estimated_time": "9-10 hours",
+      "highways": [
+        "NH-52",
+        "NH-48"
+      ],
+      "states": [
+        {
+          "code": "MP",
+          "name": "Madhya Pradesh",
+          "entry_city": "Indore",
+          "exit_city": "Dhule border",
+          "approx_km": 210,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Helmet mandatory for rider and pillion",
+            "Seatbelt mandatory for all occupants",
+            "No mobile phone while driving",
+            "Speed cameras active on NH-52 near Indore"
+          ],
+          "night_restrictions": {
+            "trucks": "No specific ban but fog conditions near Vindhyas — drive carefully",
+            "others": "None"
+          },
+          "checkposts": [
+            "Sendhwa border checkpost"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 3000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            },
+            {
+              "violation": "No Seatbelt",
+              "fine_car": 500
+            }
+          ],
+          "tips": "Fill up fuel at Indore or Dhamnod — limited stations ahead"
+        },
+        {
+          "code": "MH",
+          "name": "Maharashtra",
+          "entry_city": "Dhule",
+          "exit_city": "Mumbai",
+          "approx_km": 387,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 120,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Speed cameras active on Mumbai-Nashik expressway",
+            "Helmet mandatory with ISI mark",
+            "Toll tax applicable on expressway — keep FASTag",
+            "No drunk driving — strict enforcement near Mumbai",
+            "Triple seat banned on 2-wheelers"
+          ],
+          "night_restrictions": {
+            "trucks": "Trucks over 3.5 tonnes restricted in Mumbai city 7am-11pm",
+            "others": "None on highway"
+          },
+          "checkposts": [
+            "Dhule checkpost",
+            "Nashik checkpost",
+            "Bhiwandi checkpost"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC",
+            "FASTag"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 1000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            },
+            {
+              "violation": "No Seatbelt",
+              "fine_car": 500
+            },
+            {
+              "violation": "Drunk Driving",
+              "fine_all": 10000
+            }
+          ],
+          "tips": "Avoid Mumbai entry between 8am-10am and 6pm-9pm — heavy traffic"
+        }
+      ],
+      "critical_warnings": [
+        "Maharashtra has strict drunk driving enforcement — zero tolerance",
+        "Mumbai trucks ban 7am-11pm in city limits",
+        "FASTag mandatory on NH-48 expressway — keep wallet topped up",
+        "Ghat sections near Kasara — drive carefully, fog at night"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC",
+        "FASTag"
+      ],
+      "total_tolls_approx": "₹300-500 for car",
+      "fuel_stops": [
+        "Indore",
+        "Dhamnod",
+        "Dhule",
+        "Nashik",
+        "Thane"
+      ]
+    },
+    {
+      "id": "R002",
+      "name": "Delhi to Jaipur",
+      "origin": "Delhi",
+      "destination": "Jaipur",
+      "distance_km": 281,
+      "estimated_time": "4-5 hours",
+      "highways": [
+        "NH-48"
+      ],
+      "states": [
+        {
+          "code": "DL",
+          "name": "Delhi",
+          "entry_city": "Delhi",
+          "exit_city": "Delhi-Haryana border",
+          "approx_km": 30,
+          "speed_limits": {
+            "2wheeler": 50,
+            "car": 70,
+            "truck": 40,
+            "bus": 60
+          },
+          "key_rules": [
+            "Strict speed enforcement — CCTV on all major roads",
+            "No entry for trucks in inner Delhi 7am-10pm",
+            "Odd-even rule may apply — check before travel",
+            "Helmet mandatory in Delhi — ISI mark required",
+            "No parking on main roads"
+          ],
+          "night_restrictions": {
+            "trucks": "Heavy trucks banned 7am-10pm inner Delhi",
+            "others": "None"
+          },
+          "checkposts": [
+            "Mahipalpur",
+            "Gurgaon border"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 2000,
+              "fine_truck": 4000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 1000
+            },
+            {
+              "violation": "No Seatbelt",
+              "fine_car": 1000
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            }
+          ],
+          "tips": "Use Dwarka Expressway or NH-48 via Gurgaon for fastest exit"
+        },
+        {
+          "code": "RJ",
+          "name": "Rajasthan",
+          "entry_city": "Shahjahanpur border",
+          "exit_city": "Jaipur",
+          "approx_km": 180,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Speed cameras active after Shahjahanpur border",
+            "Helmet mandatory",
+            "Avoid stopping on highway at night in remote areas",
+            "Cattle on road — especially at dawn and dusk"
+          ],
+          "night_restrictions": {
+            "trucks": "None on NH",
+            "others": "None"
+          },
+          "checkposts": [
+            "Shahjahanpur border checkpost",
+            "Behror"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 2000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            }
+          ],
+          "tips": "Jaipur bypass — use ring road to avoid city congestion"
+        }
+      ],
+      "critical_warnings": [
+        "Delhi CCTV enforcement — all violations auto-challaned",
+        "NH-48 has speed cameras every 20km after Gurgaon",
+        "Cattle crossings common on Rajasthan highway at night"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC"
+      ],
+      "total_tolls_approx": "₹150-250 for car",
+      "fuel_stops": [
+        "Delhi",
+        "Gurgaon",
+        "Shahjahanpur",
+        "Jaipur"
+      ]
+    },
+    {
+      "id": "R003",
+      "name": "Bangalore to Chennai",
+      "origin": "Bangalore",
+      "destination": "Chennai",
+      "distance_km": 346,
+      "estimated_time": "5-6 hours",
+      "highways": [
+        "NH-44",
+        "NH-48"
+      ],
+      "states": [
+        {
+          "code": "KA",
+          "name": "Karnataka",
+          "entry_city": "Bangalore",
+          "exit_city": "Krishnagiri border",
+          "approx_km": 110,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Helmet with ISI mark mandatory",
+            "Speed cameras active on NICE road and NH-44",
+            "No mobile phone",
+            "Strict PUC enforcement in Bangalore",
+            "FASTag mandatory on expressway"
+          ],
+          "night_restrictions": {
+            "trucks": "None on NH",
+            "others": "None"
+          },
+          "checkposts": [
+            "Electronic City checkpost",
+            "Hosur border"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC",
+            "FASTag"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 2000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            },
+            {
+              "violation": "No PUC",
+              "fine_all": 10000
+            }
+          ],
+          "tips": "Leave Bangalore before 7am to avoid Electronic City traffic"
+        },
+        {
+          "code": "TN",
+          "name": "Tamil Nadu",
+          "entry_city": "Krishnagiri",
+          "exit_city": "Chennai",
+          "approx_km": 236,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "ANPR cameras active — all violations auto-detected",
+            "Helmet mandatory — heavy enforcement",
+            "No mobile phone — ₹5000 fine strictly enforced",
+            "Speed radar guns used by traffic police",
+            "Chennai city has strict no-parking zones"
+          ],
+          "night_restrictions": {
+            "trucks": "Heavy trucks banned in Chennai city 8am-10pm",
+            "others": "None on NH"
+          },
+          "checkposts": [
+            "Krishnagiri checkpost",
+            "Vellore checkpost",
+            "Poonamallee"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 2000,
+              "fine_truck": 4000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            },
+            {
+              "violation": "No PUC",
+              "fine_all": 10000
+            }
+          ],
+          "tips": "Use OMR or GST road for Chennai entry — avoid NH-48 inner ring"
+        }
+      ],
+      "critical_warnings": [
+        "Tamil Nadu ANPR cameras — challans sent to registered address automatically",
+        "Chennai truck ban 8am-10pm — plan arrival accordingly",
+        "Mobile phone fine ₹5000 strictly enforced in TN"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC",
+        "FASTag"
+      ],
+      "total_tolls_approx": "₹200-350 for car",
+      "fuel_stops": [
+        "Bangalore",
+        "Hosur",
+        "Krishnagiri",
+        "Vellore",
+        "Chennai"
+      ]
+    },
+    {
+      "id": "R004",
+      "name": "Mumbai to Pune",
+      "origin": "Mumbai",
+      "destination": "Pune",
+      "distance_km": 149,
+      "estimated_time": "2.5-3.5 hours",
+      "highways": [
+        "NH-48",
+        "Mumbai-Pune Expressway"
+      ],
+      "states": [
+        {
+          "code": "MH",
+          "name": "Maharashtra",
+          "entry_city": "Mumbai",
+          "exit_city": "Pune",
+          "approx_km": 149,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 120,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Speed cameras every 10km on expressway",
+            "Maximum speed 120 km/h on expressway for cars",
+            "Minimum speed 40 km/h on expressway",
+            "No stopping on expressway — emergency bays only",
+            "FASTag mandatory — no cash lane on expressway",
+            "Ghat section — no overtaking zone near Khandala"
+          ],
+          "night_restrictions": {
+            "trucks": "Trucks over 3.5 tonnes — extra caution on Khopoli ghat section",
+            "others": "None"
+          },
+          "checkposts": [
+            "Khopoli",
+            "Khandala ghat",
+            "Talegaon"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC",
+            "FASTag"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 1000
+            },
+            {
+              "violation": "No Seatbelt",
+              "fine_car": 500
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            },
+            {
+              "violation": "No FASTag — double toll charged",
+              "fine_car": 0
+            }
+          ],
+          "tips": "Avoid Saturday and Sunday — expressway extremely busy. Best time: 6am-9am weekdays"
+        }
+      ],
+      "critical_warnings": [
+        "Expressway has automated speed enforcement — challans mailed home",
+        "Ghat section (Khandala) — fog in monsoon, reduce speed",
+        "No FASTag = double toll at every plaza",
+        "Minimum speed 40kmh — penalty for going too slow"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC",
+        "FASTag"
+      ],
+      "total_tolls_approx": "₹250-320 for car",
+      "fuel_stops": [
+        "Mumbai (fill up before expressway)",
+        "Khopoli",
+        "Pune"
+      ]
+    },
+    {
+      "id": "R005",
+      "name": "Delhi to Lucknow",
+      "origin": "Delhi",
+      "destination": "Lucknow",
+      "distance_km": 497,
+      "estimated_time": "6-7 hours",
+      "highways": [
+        "NH-30",
+        "Agra-Lucknow Expressway"
+      ],
+      "states": [
+        {
+          "code": "DL",
+          "name": "Delhi",
+          "entry_city": "Delhi",
+          "exit_city": "Noida border",
+          "approx_km": 25,
+          "speed_limits": {
+            "2wheeler": 50,
+            "car": 70,
+            "truck": 40,
+            "bus": 60
+          },
+          "key_rules": [
+            "CCTV on all roads — strict enforcement",
+            "Truck ban inner Delhi 7am-10pm",
+            "Odd-even may apply — check before travel"
+          ],
+          "night_restrictions": {
+            "trucks": "Banned 7am-10pm inner Delhi",
+            "others": "None"
+          },
+          "checkposts": [
+            "DND Flyway",
+            "Noida border"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 2000
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            }
+          ],
+          "tips": "Use DND flyway or Yamuna expressway for quick Noida exit"
+        },
+        {
+          "code": "UP",
+          "name": "Uttar Pradesh",
+          "entry_city": "Noida",
+          "exit_city": "Lucknow",
+          "approx_km": 472,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Agra-Lucknow expressway — speed cameras every 15km",
+            "Maximum 100km/h for cars on expressway",
+            "No stopping on expressway — use designated rest areas",
+            "Helmet mandatory throughout UP",
+            "Police checkposts at district borders"
+          ],
+          "night_restrictions": {
+            "trucks": "Drive carefully — overloaded trucks common at night",
+            "others": "None"
+          },
+          "checkposts": [
+            "Kannauj",
+            "Unnao",
+            "Lucknow outer ring road"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 2000,
+              "fine_truck": 4000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 1000
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            }
+          ],
+          "tips": "Agra-Lucknow expressway is very fast — fuel up at Agra before expressway entry"
+        }
+      ],
+      "critical_warnings": [
+        "UP expressway has strict speed enforcement — challans auto-generated",
+        "Fog in winter (Nov-Feb) — reduce speed drastically",
+        "Avoid night driving on non-expressway UP roads",
+        "Police checkposts active at all district borders"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC"
+      ],
+      "total_tolls_approx": "₹300-450 for car",
+      "fuel_stops": [
+        "Delhi",
+        "Agra",
+        "Kannauj",
+        "Lucknow"
+      ]
+    },
+    {
+      "id": "R006",
+      "name": "Indore to Delhi",
+      "origin": "Indore",
+      "destination": "Delhi",
+      "distance_km": 787,
+      "estimated_time": "11-12 hours",
+      "highways": [
+        "NH-52",
+        "NH-3",
+        "NH-48"
+      ],
+      "states": [
+        {
+          "code": "MP",
+          "name": "Madhya Pradesh",
+          "entry_city": "Indore",
+          "exit_city": "Gwalior border",
+          "approx_km": 430,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Helmet mandatory",
+            "Speed cameras near Bhopal and Gwalior",
+            "Wildlife zones near Gwalior — drive carefully at night",
+            "Fuel up at Indore, Bhopal, and Gwalior"
+          ],
+          "night_restrictions": {
+            "trucks": "Night driving risky on Bhopal-Gwalior section",
+            "others": "None"
+          },
+          "checkposts": [
+            "Bhopal checkpost",
+            "Gwalior border"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 3000
+            },
+            {
+              "violation": "No Helmet",
+              "fine_2wheeler": 500
+            }
+          ],
+          "tips": "Bhopal bypass is under construction — allow extra 30 mins"
+        },
+        {
+          "code": "RJ",
+          "name": "Rajasthan",
+          "entry_city": "Dholpur border",
+          "exit_city": "Faridabad border",
+          "approx_km": 200,
+          "speed_limits": {
+            "2wheeler": 60,
+            "car": 100,
+            "truck": 80,
+            "bus": 80
+          },
+          "key_rules": [
+            "Speed cameras near Bharatpur",
+            "Cattle on road after sunset",
+            "Helmet mandatory"
+          ],
+          "night_restrictions": {
+            "trucks": "None",
+            "others": "None"
+          },
+          "checkposts": [
+            "Dholpur checkpost",
+            "Bharatpur"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "Overspeeding",
+              "fine_car": 1000,
+              "fine_truck": 2000
+            }
+          ],
+          "tips": "Short stretch — fill up fuel at Dholpur"
+        },
+        {
+          "code": "DL",
+          "name": "Delhi",
+          "entry_city": "Faridabad border",
+          "exit_city": "Delhi",
+          "approx_km": 30,
+          "speed_limits": {
+            "2wheeler": 50,
+            "car": 70,
+            "truck": 40,
+            "bus": 60
+          },
+          "key_rules": [
+            "CCTV on all entry roads",
+            "Truck ban inner Delhi 7am-10pm",
+            "Pollution certificate strictly checked at border"
+          ],
+          "night_restrictions": {
+            "trucks": "Banned 7am-10pm",
+            "others": "None"
+          },
+          "checkposts": [
+            "Faridabad border",
+            "Badarpur"
+          ],
+          "documents_needed": [
+            "DL",
+            "RC",
+            "Insurance",
+            "PUC"
+          ],
+          "top_fines": [
+            {
+              "violation": "No PUC",
+              "fine_all": 10000
+            },
+            {
+              "violation": "Mobile Phone",
+              "fine_all": 5000
+            }
+          ],
+          "tips": "Avoid Delhi entry peak hours — try to arrive before 8am or after 10pm"
+        }
+      ],
+      "critical_warnings": [
+        "Long route — plan overnight rest if not leaving before 6am",
+        "Bhopal bypass construction — add 30-45 minutes",
+        "Delhi pollution check strict — PUC must be valid and recent",
+        "Cattle on road between Gwalior and Dholpur at night"
+      ],
+      "documents_full_list": [
+        "DL",
+        "RC",
+        "Insurance",
+        "PUC"
+      ],
+      "total_tolls_approx": "₹500-800 for car",
+      "fuel_stops": [
+        "Indore",
+        "Bhopal",
+        "Gwalior",
+        "Dholpur",
+        "Delhi"
+      ]
+    }
+  ],
+  "state_speed_limits": {
+    "MP": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "MH": {
+      "2wheeler": 60,
+      "car": 120,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 120
+    },
+    "DL": {
+      "2wheeler": 50,
+      "car": 70,
+      "truck": 40,
+      "bus": 60,
+      "expressway_car": 70
+    },
+    "KA": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "TN": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "UP": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "GJ": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "RJ": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "AP": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    },
+    "TS": {
+      "2wheeler": 60,
+      "car": 100,
+      "truck": 80,
+      "bus": 80,
+      "expressway_car": 100
+    }
+  },
+  "state_key_documents": {
+    "all_states": [
+      "DL",
+      "RC",
+      "Insurance",
+      "PUC"
+    ],
+    "expressway": [
+      "DL",
+      "RC",
+      "Insurance",
+      "PUC",
+      "FASTag"
+    ],
+    "commercial": [
+      "DL",
+      "RC",
+      "Insurance",
+      "PUC",
+      "Permit",
+      "Fitness Certificate"
+    ]
+  }
+}
